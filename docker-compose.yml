@@ -5,7 +5,7 @@ services:
     container_name: nextjs-dashboard
     build: .
     ports:
-      - "3000:3000"
+      - "3666:3000"
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_BASE_URL=https://api-rbac.tokocoding.com/api
@@ -14,4 +14,12 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+    networks:
+      - rabc_doni_network
     restart: unless-stopped
+
+
+networks:
+  rabc_doni_network:
+    driver: bridge
+    name: rabc_doni_network
