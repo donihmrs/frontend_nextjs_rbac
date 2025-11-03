@@ -21,11 +21,17 @@ RUN bunx next build
 FROM oven/bun:1.3.1 AS production
 WORKDIR /app
 
-# Copy hasil build dari stage sebelumnya
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+# Copy necessary runtime dependencies
 COPY --from=builder /app/package.json ./
-COPY --from=builder /app/next.config.ts ./
+COPY --from=builder /app/bun.lockb ./
+COPY --from=builder /app/next.config.js ./
+
+# Install only production deps
+RUN bun install --production
+
+# Copy entire .next build output (not just parts)
+COPY --from=builder /app/.next .next
+COPY --from=builder /app/public ./public
 
 ENV NODE_ENV=production
 ENV PORT=3000
