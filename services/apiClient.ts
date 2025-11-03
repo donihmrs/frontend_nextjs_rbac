@@ -1,6 +1,6 @@
 import { refreshToken } from "@/app/helper";
 
-export const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+export const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
 
 export async function apiFetchClient(endpoint: string, options: RequestInit = {}, retry = true): Promise<any> {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
