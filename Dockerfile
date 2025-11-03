@@ -26,6 +26,8 @@ ENV NODE_ENV=production
 ENV TZ=Asia/Jakarta
 ENV NEXT_PUBLIC_API_BASE_URL=https://api-rbac.tokocoding.com/api
 
+RUN bun run build
+
 # Stage: Final image for production
 FROM oven/bun:1.3.1-alpine AS release
 WORKDIR /app
