@@ -35,5 +35,5 @@ ENV NODE_ENV=production
 ENV TZ=Asia/Jakarta
 ENV NEXT_PUBLIC_API_BASE_URL=https://api-rbac.tokocoding.com/api
 
-EXPOSE 3000
-CMD ["bun", "run", "start", "--", "-H", "0.0.0.0"]
+EXPOSE 3666
+CMD ["bun", "run", "start", "--", "-H", "0.0.0.0", "-p", "3666"]
