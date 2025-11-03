@@ -1,41 +1,39 @@
-# Base image with Bun
-FROM oven/bun:1.3.1 AS base
-WORKDIR /usr/src/app
+# =========================
+# Stage 1: Build
+# =========================
+FROM oven/bun:1.3.1 AS builder
+WORKDIR /app
 
-# Stage: Install dev dependencies
-FROM base AS install
-RUN mkdir -p /temp/dev
-WORKDIR /temp/dev
-COPY package.json .
-COPY bun.lock .
+# Copy dependency files
+COPY bun.lockb* bun.lock* package.json ./
 RUN bun install --frozen-lockfile
 
-# Stage: Install production dependencies
-RUN mkdir -p /temp/prod
-WORKDIR /temp/prod
-COPY package.json .
-COPY bun.lock .
-RUN bun install --frozen-lockfile --production
-
-# Stage: Run tests (optional)
-FROM base AS prerelease
-WORKDIR /app
-COPY --from=install /temp/dev/node_modules ./node_modules
+# Copy full project
 COPY . .
+
+# Build Next.js
+ENV NODE_ENV=production
+ENV NEXT_PUBLIC_API_BASE_URL=https://api-rbac.tokocoding.com/api
+RUN bunx --bun next build
+
+# =========================
+# Stage 2: Run (production)
+# =========================
+FROM oven/bun:1.3.1-alpine AS runner
+WORKDIR /app
+
+# Copy build output and needed files
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/next.config.* ./
+COPY --from=builder /app/bun.lock* ./
+
+# Set env
 ENV NODE_ENV=production
 ENV TZ=Asia/Jakarta
 ENV NEXT_PUBLIC_API_BASE_URL=https://api-rbac.tokocoding.com/api
 
-RUN bun run build
-
-# Stage: Final image for production
-FROM oven/bun:1.3.1-alpine AS release
-WORKDIR /app
-COPY --from=install /temp/prod/node_modules ./node_modules
-COPY --from=prerelease /app/.next .next
-COPY --from=prerelease /app/public public
-COPY --from=prerelease /app/package.json ./
-COPY --from=prerelease /app/next.config.ts ./
-
-EXPOSE 3000/tcp
-ENTRYPOINT [ "bun", "run", "start" ]
+EXPOSE 3000
+CMD ["bun", "run", "start"]
