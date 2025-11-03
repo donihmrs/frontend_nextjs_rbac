@@ -24,7 +24,7 @@ WORKDIR /app
 # Copy necessary runtime dependencies
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/bun.lockb ./
-COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/next.config.ts ./
 
 # Install only production deps
 RUN bun install --production
