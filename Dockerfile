@@ -3,7 +3,7 @@ FROM oven/bun:1.3.1 AS base
 WORKDIR /app
 
 # Salin dependency file
-COPY bun.lockb package.json ./
+COPY bun.lock package.json ./
 
 # Install dependencies
 RUN bun install --frozen-lockfile
