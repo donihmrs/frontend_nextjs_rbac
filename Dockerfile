@@ -22,8 +22,8 @@ FROM oven/bun:1.3.1 AS production
 WORKDIR /app
 
 # Copy hasil build dari stage sebelumnya
-COPY --from=builder /app/.next .next
-COPY --from=builder /app/public public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/next.config.ts ./
 
