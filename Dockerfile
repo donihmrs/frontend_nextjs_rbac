@@ -15,7 +15,7 @@ COPY . .
 ENV NEXT_PUBLIC_API_BASE_URL=https://api-rbac.tokocoding.com/api
 
 # Build Next.js app
-RUN bun run build
+RUN bun run next build
 
 # ---- Production stage ----
 FROM oven/bun:1.3.1 AS production
