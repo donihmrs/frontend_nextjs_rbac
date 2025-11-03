@@ -33,7 +33,7 @@ export default function ProductsPage() {
     const storedPermission = JSON.parse(localStorage.getItem("permissions_obj") || "{}");
     setPermission(storedPermission);
 
-    if (!storedPermission?.invitations.read ) {
+    if (!storedPermission?.products.read ) {
       router.push("/dashboard");
     }
   }, []);

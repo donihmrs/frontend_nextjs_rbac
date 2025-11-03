@@ -24,7 +24,7 @@ export default function UsersPage() {
     const storedPermission = JSON.parse(localStorage.getItem("permissions_obj") || "{}");
     setPermission(storedPermission);
 
-    if (!storedPermission?.invitations.read ) {
+    if (!storedPermission?.users.read ) {
       router.push("/dashboard");
     }
   }, []);
