@@ -7,15 +7,34 @@ import { useEffect, useState } from "react";
 import { Table, Card, Spin, Row, Col, Typography, Modal, Form, Input, Button, Select, App } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { getOrders, deleteOrder, getOrderById, createOrder, updateStatusOrder } from "@/services/orderService";
+import { useRouter } from "next/navigation";
+import { getProducts } from "@/services/productService";
 
 const { Title } = Typography;
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  stock: number;
+  status: boolean;
+}
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const { message } = App.useApp();
+
+  const router = useRouter();
+  
+  const permission = JSON.parse(localStorage.getItem("permissions_obj") || "{}");
+
+  if (!permission?.orders.read ) {
+    router.push("/dashboard");
+  }
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -27,6 +46,23 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      await getProducts()
+        .then((data) => setProducts(data))
+        .catch((err) => console.error("Failed to fetch products:", err));
+
+    } catch (err) {
+      console.error(err);
+      message.error("Failed to load products");
+    } finally {
+      setLoading(false);
+      }
   };
 
   useEffect(() => {
@@ -90,6 +126,31 @@ export default function OrdersPage() {
     }
   };  
 
+  // Modal and Handle Add Order
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addForm] = Form.useForm();
+
+  const showAddModal = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleCancelAdd = () => {
+    setIsAddModalOpen(false);
+  };
+
+  const handleConfirmAdd = async () => {
+    try {
+      const values = await addForm.validateFields();
+      await createOrder(values);
+      message.success("Order created successfully.");
+      fetchOrders();
+    } catch (error) {
+      message.error("Failed to create order.");
+    } finally {
+      setIsAddModalOpen(false);
+    }
+  };    
+
   const columns = [
               { title: "ID", dataIndex: "id", key: "id" },
               { title: "Customer", dataIndex: "customer_name", key: "customer_name" },
@@ -109,18 +170,21 @@ export default function OrdersPage() {
                 key: "actions",
                 render: (_: any, record: any) => (
                   <>
-                    {/* Edit show only if status is Pending */}
-                    {record.status === "Pending" && (
-                    <Button
-                      type="link"
-                      icon={<EditOutlined />}
-                      onClick={() => showEditModal(record.id)}
-                    > </Button>) && <Button
-                      type="link"
-                      icon={<DeleteOutlined />}
-                      onClick={() => showDeleteModal(record.id)}
-                    />}
-                    
+                    {permission?.orders?.update && record.status === "Pending" && (
+                      <>
+                        <Button
+                          type="link"
+                          icon={<EditOutlined />}
+                          onClick={() => showEditModal(record.id)}
+                        />
+
+                        <Button
+                          type="link"
+                          icon={<DeleteOutlined />}
+                          onClick={() => showDeleteModal(record.id)}
+                        />
+                      </>
+                    )}
                   </>
                 ),
               },
@@ -132,6 +196,13 @@ export default function OrdersPage() {
         <Col span={12}>
           <Title level={4}>Orders</Title>
         </Col>
+        {permission?.orders?.write && (
+        <Col span={12} style={{ textAlign: "right" }}>
+          <Button type="primary" onClick={() => { showAddModal(); fetchProducts(); }}>
+            Add Order
+          </Button>
+        </Col>
+        )}
       </Row>
       <Card>
         {loading ? (
@@ -182,6 +253,45 @@ export default function OrdersPage() {
         okButtonProps={{ danger: true }}
       >
         <p>Are you sure you want to delete this order?</p>
+      </Modal>
+
+      // Add Modar add order
+      <Modal
+        title="Add Order"
+        open={isAddModalOpen}
+        onOk={handleConfirmAdd}
+        onCancel={handleCancelAdd}
+      >
+        <Form form={addForm} layout="vertical">
+          <Form.Item
+            name="customer_name"
+            label="Customer Name"
+            rules={[{ required: true, message: "Please enter the customer name." }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="product_id"
+            label="Product"
+            rules={[{ required: true, message: "Please select a product." }]}
+          >
+            <Select>
+              {/* Options should be populated dynamically */}
+              {products.map((product) => (
+                <Select.Option key={product.id} value={product.id}>
+                  {product.name} - Rp. {product.price}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="quantity"
+            label="Quantity"
+            rules={[{ required: true, message: "Please enter the quantity." }]}
+          >
+            <Input type="number" min={1} />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );

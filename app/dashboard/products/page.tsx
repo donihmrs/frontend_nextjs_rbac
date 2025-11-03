@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Table, Card, Spin, Row, Col, Typography, Modal, Form, InputNumber, Input, Button, Select, App } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { createProduct, deleteProduct, getProductById, getProducts, updateProduct } from "@/services/productService";
+import { useRouter } from "next/navigation";
 
 const { Title, Text } = Typography;
 
@@ -23,9 +24,19 @@ export default function ProductsPage() {
   const [isDeleteModal, setIsDeleteModal] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+  const router = useRouter();
+
+  const permission = JSON.parse(localStorage.getItem("permissions_obj") || "{}");
+
+  if (!permission?.products.read ) {
+    router.push("/dashboard");
+  }
+
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const [formAdd] = Form.useForm();
+
+  console.log(permission)
 
   const fetchProducts = async () => {
     try {
@@ -221,14 +232,17 @@ export default function ProductsPage() {
       key: "actions",
       render: (_: any, record: Product) => (
         <div style={{ display: "flex", gap: 8 }}>
-          <Button color="cyan" variant="solid" icon={<EditOutlined />} onClick={() => {
-            // Open edit modal
-            showModal(record.id);
-          }} />
-          <Button color="danger" variant="solid" icon={<DeleteOutlined />}  onClick={() => {
+          {permission?.products?.update && (
+            <Button color="cyan" variant="solid" icon={<EditOutlined />} onClick={() => {
+              // Open edit modal
+              showModal(record.id);
+            }} />
+          )}
+          {permission?.products?.delete && (
+            <Button color="danger" variant="solid" icon={<DeleteOutlined />}  onClick={() => {
             // Open delete confirmation modal
             showDeleteModal(record.id);
-          }} />
+          }} />)}
         </div>
       ),
       responsive: ["xs","sm"],
@@ -243,11 +257,13 @@ export default function ProductsPage() {
           <Text type="secondary">Manage your products effectively</Text>
         </Col>
         <Col span={12} style={{ textAlign: "right", marginBottom: 16 }}>
-          <Button type="primary" onClick={() => {
-            showAddModal();
-          }}>
-            Add New Product
-          </Button>
+          {permission?.products?.write && (
+            <Button type="primary" onClick={() => {
+              showAddModal();
+            }}>
+              Add New Product
+            </Button>
+          )}
         </Col>
       </Row>
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Table, Card, Spin, Row, Col, Typography, Modal, Form, Input, Button, Select, App, Badge } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { getUsers, deleteUser, getUserByUsername, updateUser, createUser } from "@/services/userService";
+import { useRouter } from "next/navigation";
 
 const { Title } = Typography;
 
@@ -13,6 +14,15 @@ export default function UsersPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUserUsername, setSelectedUserUsername] = useState<string | null>(null);
   const { message } = App.useApp();
+
+  const router = useRouter();
+  
+  const permission = JSON.parse(localStorage.getItem("permissions_obj") || "{}");
+
+  if (!permission?.users.read ) {
+    router.push("/dashboard");
+  }
+  
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -169,8 +179,12 @@ export default function UsersPage() {
       key: "actions",
       render: (_: any, record: any) => (
         <div>
-          <Button type="link" icon={<EditOutlined />} onClick={() => showEditModal(record.username)} />
-          <Button type="link" icon={<DeleteOutlined />} onClick={() => showDeleteModal(record.username)} />
+          {permission?.users?.update && (
+            <Button type="link" icon={<EditOutlined />} onClick={() => showEditModal(record.username)} />
+          )}
+          {permission?.users?.delete && (
+            <Button type="link" icon={<DeleteOutlined />} onClick={() => showDeleteModal(record.username)} />
+          )}
         </div>
       ),
     }
@@ -182,9 +196,11 @@ export default function UsersPage() {
         <Col span={12}>
           <Title level={4}>Users</Title>
         </Col>
-        <Col span={12} style={{ textAlign: "right", marginBottom: 16 }}>
-          <Button type="primary" onClick={showCreateModal}>Add New User</Button>
-        </Col>  
+        {permission?.users?.write && (
+          <Col span={12} style={{ textAlign: "right", marginBottom: 16 }}>
+            <Button type="primary" onClick={showCreateModal}>Add New User</Button>
+          </Col>
+        )}
       </Row>
       {loading ? (
         <Spin />
