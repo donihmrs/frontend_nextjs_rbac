@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Table, Card, Spin, Row, Col, Typography, Modal, Form, InputNumber, Input, Button, Select, App } from "antd";
+import { Table, Card, Spin, Row, Col, Typography, Modal, Form, InputNumber, Input, Button, Select, App, Breakpoint } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { createProduct, deleteProduct, getProductById, getProducts, updateProduct } from "@/services/productService";
 import { useRouter } from "next/navigation";
@@ -24,19 +24,23 @@ export default function ProductsPage() {
   const [isDeleteModal, setIsDeleteModal] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+  const [permission, setPermission] = useState<any>({});
+
   const router = useRouter();
 
-  const permission = JSON.parse(localStorage.getItem("permissions_obj") || "{}");
+  useEffect(() => {
+    // ini baru jalan di client
+    const storedPermission = JSON.parse(localStorage.getItem("permissions_obj") || "{}");
+    setPermission(storedPermission);
 
-  if (!permission?.products.read ) {
-    router.push("/dashboard");
-  }
+    if (!storedPermission?.invitations.read ) {
+      router.push("/dashboard");
+    }
+  }, []);
 
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const [formAdd] = Form.useForm();
-
-  console.log(permission)
 
   const fetchProducts = async () => {
     try {
@@ -188,14 +192,14 @@ export default function ProductsPage() {
       dataIndex: "id",
       key: "id",
       width: 80,
-      responsive: ["md"], // tampil hanya di layar medium ke atas
+      responsive: ["md"] as Breakpoint[], // tampil hanya di layar medium ke atas
     },
     {
       title: "Product Name",
       dataIndex: "name",
       key: "name",
       sorter: (a: Product, b: Product) => a.name.localeCompare(b.name),
-      resposive: ["xs","sm"],
+      responsive: ["xs","sm"] as Breakpoint[],
     },
     {
       title: "Price",
@@ -203,14 +207,14 @@ export default function ProductsPage() {
       key: "price",
       render: (value: number) => `Rp ${value.toLocaleString()}`,
       sorter: (a: Product, b: Product) => a.price - b.price,
-      responsive: ["xs","sm"],
+      responsive: ["xs","sm"] as Breakpoint[],
     },
     {
       title: "Stock",
       dataIndex: "stock",
       key: "stock",
       sorter: (a: Product, b: Product) => a.stock - b.stock,
-      responsive: ["xs","sm"],
+      responsive: ["xs","sm"] as Breakpoint[],
     },
     {
       title: "Status",
@@ -223,7 +227,7 @@ export default function ProductsPage() {
         </Button>
       ),
       sorter: (a: Product, b: Product) => (a.status === b.status ? 0 : a.status ? 1 : -1),
-      responsive: ["xs","sm"],
+      responsive: ["xs","sm"] as Breakpoint[],
     },
 
     // Create Action Edit and Delete buttons Open Modal
@@ -245,7 +249,7 @@ export default function ProductsPage() {
           }} />)}
         </div>
       ),
-      responsive: ["xs","sm"],
+      responsive: ["xs","sm"] as Breakpoint[],
     },
   ];
 

@@ -28,13 +28,19 @@ export default function OrdersPage() {
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const { message } = App.useApp();
 
-  const router = useRouter();
-  
-  const permission = JSON.parse(localStorage.getItem("permissions_obj") || "{}");
+  const [permission, setPermission] = useState<any>({});
 
-  if (!permission?.orders.read ) {
-    router.push("/dashboard");
-  }
+  const router = useRouter();
+
+  useEffect(() => {
+    // ini baru jalan di client
+    const storedPermission = JSON.parse(localStorage.getItem("permissions_obj") || "{}");
+    setPermission(storedPermission);
+
+    if (!storedPermission?.orders.read ) {
+      router.push("/dashboard");
+    }
+  }, []);
 
   const fetchOrders = async () => {
     setLoading(true);

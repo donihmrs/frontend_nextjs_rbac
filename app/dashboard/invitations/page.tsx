@@ -18,13 +18,22 @@ export default function InvitationsPage() {
   const [selectedInvitationId, setSelectedInvitationId] = useState<number | null>(null);
   const { message } = App.useApp();
 
+  const [permission, setPermission] = useState<any>({});
+
   const router = useRouter();
 
-  const permission = JSON.parse(localStorage.getItem("permissions_obj") || "{}");
+  useEffect(() => {
+    // ini baru jalan di client
+    const storedPermission = JSON.parse(localStorage.getItem("permissions_obj") || "{}");
+    setPermission(storedPermission);
 
-  if (!permission?.invitations.read ) {
-    router.push("/dashboard");
-  }
+    if (!storedPermission?.invitations.read ) {
+      router.push("/dashboard");
+    }
+  }, []);
+
+
+  
 
   const fetchInvitations = async () => {
     setLoading(true);

@@ -9,14 +9,14 @@
 'use client';
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Form, Input, Button, Typography, message, Card } from "antd";
 import { acceptInvitation } from "@/services/invitationService";
 import { useSearchParams } from "next/navigation";
 
 const { Title } = Typography;
 
-export default function AcceptInvitationPage() {
+function AcceptInvitationContent() {
   const router = useRouter();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -81,3 +81,11 @@ export default function AcceptInvitationPage() {
     </Card>
   );
 };
+
+export default function AcceptInvitationPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AcceptInvitationContent />
+    </Suspense>
+  );
+}
