@@ -32,9 +32,6 @@ export default function InvitationsPage() {
     }
   }, []);
 
-
-  
-
   const fetchInvitations = async () => {
     setLoading(true);
     try {

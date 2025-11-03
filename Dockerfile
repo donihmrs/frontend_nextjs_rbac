@@ -1,12 +1,12 @@
 # ---- Base stage ----
-FROM oven/bun:1.3.1 AS base
+FROM oven/bun:1.3.1 AS builder
 WORKDIR /app
 
 # Copy dependency files
 COPY bun.lock package.json ./
 
-# Install dependencies (gunakan tanpa --frozen-lockfile dulu)
-RUN bun install
+# Install dependencies
+RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -21,7 +21,10 @@ RUN bun run next build
 FROM oven/bun:1.3.1 AS production
 WORKDIR /app
 
-COPY --from=base /app ./
+# Copy hasil build dari stage sebelumnya
+COPY --from=builder /app/.next .next
+COPY --from=builder /app/public public
+COPY --from=builder /app/package.json .
 
 ENV NODE_ENV=production
 ENV PORT=3000
