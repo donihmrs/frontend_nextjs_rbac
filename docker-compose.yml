@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  nextjs:
+    container_name: nextjs-dashboard
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_BASE_URL=https://api-rbac.tokocoding.com/api
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
