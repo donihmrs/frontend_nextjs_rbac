@@ -3,7 +3,7 @@ FROM oven/bun:1.3.1 AS base
 WORKDIR /app
 
 # Copy dependency files
-COPY bun.lockb package.json ./
+COPY bun.lock package.json ./
 
 # Install dependencies (gunakan tanpa --frozen-lockfile dulu)
 RUN bun install
