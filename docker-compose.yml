@@ -1,8 +1,8 @@
 version: "3.9"
 
 services:
-  nextjs:
-    container_name: nextjs-dashboard
+  frontendrbac:
+    container_name: frontend-rbac
     build: .
     ports:
       - "3666:3000"
